@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import useToggle from '../../hooks/useToggle';
 import useInput from '../../hooks/useInput';
 import LogInValidate from '../../validations/loginValidations';
-import ApiCalls from '../../helpers/ApiCalls';
-import LocalStorage from '../../helpers/LocalStorage';
-import { Auth } from '../../contexts/Auth';
-
+import ApiCalls from '../../services/ApiCalls';
+import LocalStorage from '../../services/LocalStorage';
+import { AuthContext } from '../../contexts/AuthContext';
+import FlashAlerts from '../../utils/FlashAlerts';
 //icons
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -22,7 +22,8 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Typography from '@material-ui/core/Typography';
-import Alert from '@material-ui/lab/Alert';
+import FlashState from '../../services/FlashState';
+import { withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -59,14 +60,15 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-function Login() {
+function Login(props) {
 	const classes = useStyles();
 
 	const [isVisible, setVisibility] = useToggle();
 	const [values, setValue] = useInput({ email: '', password: '' });
 	const [helperText, setHelperText] = useState({ email: null, password: null });
-	const [feedback, setFeedback] = useState(null);
-	const { login } = useContext(Auth);
+	const [feedback, setFeedback] = useState({ message: null, severity: null });
+
+	const { login } = useContext(AuthContext);
 
 	const handleOnSubmit = async (e) => {
 		e.preventDefault();
@@ -86,31 +88,29 @@ function Login() {
 		});
 
 		if (status === 401) {
-			setFeedback(data.message);
+			setFeedback({ message: data.message, severity: 'error' });
 			return false;
 		}
 
 		//store token and refreshtoken in localStorage
 		LocalStorage.setItem('token', JSON.stringify(data.token));
-		login();
+		LocalStorage.setItem('user', JSON.stringify(data.user));
 
-		//setRedirectState
-		// setRedirect('/dashboard');
+		setFeedback({ message: null, severity: null });
+		return login();
 	};
 
-	// if (redirect) {
-	// 	return <Redirect to="/dashboard"></Redirect>;
-	// }
+	useEffect(() => {
+		let { message, severity } = FlashState.getFlash();
+		setFeedback({ message, severity });
+	}, []);
 
 	return (
 		<div className={classes.root}>
 			<Card className={classes.card}>
-				<CardHeader title={<Typography variant="h4">LOGIN</Typography>}></CardHeader>
-				{feedback && (
-					<Alert className={classes.alert} severity="error">
-						{feedback}
-					</Alert>
-				)}
+				<CardHeader title={<Typography variant="h4">LOGIN</Typography>} />
+				<FlashAlerts feedback={feedback.message} severity={feedback.severity} />
+
 				<form onSubmit={handleOnSubmit} noValidate>
 					<FormControl
 						margin="normal"
@@ -168,4 +168,4 @@ function Login() {
 	);
 }
 
-export default Login;
+export default withRouter(Login);

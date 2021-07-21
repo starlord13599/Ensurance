@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, memo } from 'react';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -12,17 +12,20 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
-import { Auth } from '../contexts/Auth';
+import Link from '@material-ui/core/Link';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import LocalStorage from '../services/LocalStorage';
+import getRoles from '../services/Roles';
+import { AuthContext } from '../contexts/AuthContext';
+import FlashState from '../services/FlashState';
 
-const drawerWidth = 240;
+const drawerWidth = 210;
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -93,9 +96,17 @@ function DrawerLayout({ children }) {
 	const classes = useStyles();
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
-	const { isAuthenticated, logout } = useContext(Auth);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const menuOpen = Boolean(anchorEl);
+	const { role } = LocalStorage.getItem('user');
+	const { logout, isAuthenticated } = useContext(AuthContext);
+
+	const handleLogout = () => {
+		FlashState.setFlash('You are successfully logged out', 'success');
+		return logout();
+	};
+
+	let appDrawerItems = getRoles(role);
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -157,7 +168,12 @@ function DrawerLayout({ children }) {
 								open={menuOpen}
 								onClose={handleClose}
 							>
-								<MenuItem onClick={logout}>Sign Out</MenuItem>
+								<MenuItem onClick={handleLogout}>
+									<ListItemIcon>
+										<ExitToAppIcon />
+									</ListItemIcon>
+									<Typography variant="inherit">Sign Out</Typography>
+								</MenuItem>
 							</Menu>
 						</div>
 					)}
@@ -186,13 +202,13 @@ function DrawerLayout({ children }) {
 				<Divider />
 
 				<List>
-					{['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-						<ListItem button key={text}>
-							<ListItemIcon>
-								{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-							</ListItemIcon>
-							<ListItemText primary={text} />
-						</ListItem>
+					{appDrawerItems.map((items) => (
+						<Link key={items.title} color="inherit" underline="none" href={items.href}>
+							<ListItem button>
+								<ListItemIcon>{<items.icon />}</ListItemIcon>
+								<ListItemText primary={items.title} />
+							</ListItem>
+						</Link>
 					))}
 				</List>
 			</Drawer>
@@ -205,4 +221,4 @@ function DrawerLayout({ children }) {
 	);
 }
 
-export default DrawerLayout;
+export default memo(DrawerLayout);

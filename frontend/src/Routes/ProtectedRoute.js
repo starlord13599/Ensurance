@@ -1,12 +1,29 @@
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
+import FlashState from '../services/FlashState';
 
-function ProtectedRoute({ isAuthenticated, Component, ...options }) {
-	if (!isAuthenticated) {
-		return <Redirect to="/login"></Redirect>;
-	}
-
-	return <Route {...options} component={Component} />;
+function ProtectedRoute({ Component, isAuthenticated, ...options }) {
+	return (
+		<Route
+			{...options}
+			render={(props) => {
+				if (!isAuthenticated) {
+					FlashState.setFlash('You need to login to access this page', 'info');
+					return (
+						<Redirect
+							to={{
+								pathname: '/login',
+								state: {
+									from: props.location,
+								},
+							}}
+						/>
+					);
+				}
+				return <Component {...props} />;
+			}}
+		/>
+	);
 }
 
 export default ProtectedRoute;
