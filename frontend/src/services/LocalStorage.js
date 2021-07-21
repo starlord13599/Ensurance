@@ -1,4 +1,6 @@
 class LocalStorage {
+	data = null;
+
 	setItem(key, value) {
 		localStorage.setItem(key, value);
 		return this;
@@ -6,11 +8,10 @@ class LocalStorage {
 
 	getItem(key) {
 		const value = localStorage.getItem(key);
-
 		if (!value) {
 			return null;
 		}
-		return value;
+		return JSON.parse(value);
 	}
 
 	deleteItem(key) {
@@ -20,6 +21,7 @@ class LocalStorage {
 
 	deleteAllItems() {
 		localStorage.clear();
+		return this;
 	}
 }
 
