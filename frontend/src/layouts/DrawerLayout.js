@@ -149,7 +149,7 @@ function DrawerLayout({ children }) {
 						Ensurance
 					</Typography>
 
-					{isAuthenticated && (
+					{true && (
 						<div className={classes.profileButton}>
 							<IconButton onClick={handleMenu} color="inherit">
 								<AccountCircle />
