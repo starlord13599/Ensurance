@@ -92,7 +92,7 @@ function Login(props) {
 			return false;
 		}
 
-		//store token and refreshtoken in localStorage
+		//store token and refreshToken in localStorage
 		LocalStorage.setItem('token', JSON.stringify(data.token));
 		LocalStorage.setItem('user', JSON.stringify(data.user));
 
@@ -109,7 +109,10 @@ function Login(props) {
 		<div className={classes.root}>
 			<Card className={classes.card}>
 				<CardHeader title={<Typography variant="h4">LOGIN</Typography>} />
-				<FlashAlerts feedback={feedback.message} severity={feedback.severity} />
+
+				{feedback.message && (
+					<FlashAlerts feedback={feedback.message} severity={feedback.severity} />
+				)}
 
 				<form onSubmit={handleOnSubmit} noValidate>
 					<FormControl

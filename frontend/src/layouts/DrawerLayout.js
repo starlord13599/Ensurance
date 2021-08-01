@@ -149,7 +149,7 @@ function DrawerLayout({ children }) {
 						Ensurance
 					</Typography>
 
-					{true && (
+					{isAuthenticated && (
 						<div className={classes.profileButton}>
 							<IconButton onClick={handleMenu} color="inherit">
 								<AccountCircle />
@@ -202,14 +202,20 @@ function DrawerLayout({ children }) {
 				<Divider />
 
 				<List>
-					{appDrawerItems.map((items) => (
-						<Link key={items.title} color="inherit" underline="none" href={items.href}>
-							<ListItem button>
-								<ListItemIcon>{<items.icon />}</ListItemIcon>
-								<ListItemText primary={items.title} />
-							</ListItem>
-						</Link>
-					))}
+					{appDrawerItems &&
+						appDrawerItems.map((items) => (
+							<Link
+								key={items.title}
+								color="inherit"
+								underline="none"
+								href={items.href}
+							>
+								<ListItem button>
+									<ListItemIcon>{<items.icon />}</ListItemIcon>
+									<ListItemText primary={items.title} />
+								</ListItem>
+							</Link>
+						))}
 				</List>
 			</Drawer>
 

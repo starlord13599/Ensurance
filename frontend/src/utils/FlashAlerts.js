@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
+import Collapse from '@material-ui/core/Collapse';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -10,15 +11,23 @@ const useStyles = makeStyles((theme) => ({
 
 function FlashAlerts({ feedback, severity = 'info' }) {
 	const classes = useStyles();
+	const [open, setOpen] = useState(true);
 
 	if (!feedback) {
 		return null;
 	}
 
 	return (
-		<Alert className={classes.root} severity={severity}>
-			{feedback}
-		</Alert>
+		<Collapse in={open} className={classes.root}>
+			<Alert
+				onClose={() => {
+					setOpen(false);
+				}}
+				severity={severity}
+			>
+				{feedback}
+			</Alert>
+		</Collapse>
 	);
 }
 
